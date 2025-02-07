@@ -36,7 +36,7 @@ def logger_config(log_path, logging_name):
     return logger
 
 # 日志
-if not os.path.exists("../log"):
-    os.mkdir("../log")
+if not os.path.exists("./log"):
+    os.mkdir("./log")
 
 server_logger = logger_config(log_path='facefusion_server.log', logging_name='FaceFusionAPI')
