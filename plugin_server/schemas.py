@@ -33,7 +33,9 @@ class ApparelDetail(BaseModel):
 class GenUserDetail(BaseModel):
 	face_shape: str
 	skin_tone: int
+	pose: str
 	body_dimensions: List[dict]
+	body_dimension_lengths: List[dict]
 	hairstyle: str
 	hair_color: str
 	camera_view: str
@@ -47,6 +49,7 @@ class ImageOptions(BaseModel):
 	thumbnail_width: int
 
 class VideoOptions(BaseModel):
+	pixverse: bool
 	duration: int
 	negative_prompt: str
 	prompt: str
@@ -64,4 +67,6 @@ class VideoGenerateRequest(BaseModel):
 
 class ClothesRequest(BaseModel):
 	url: str
+	brand: str
 	name: str
+

@@ -8,6 +8,7 @@ from plugin_server.utils import *
 
 
 def ue_process(ue_json_data):
+    start_time = time.time()
     # 先请求ue
     try:
         # 先试着连接到UE
@@ -67,6 +68,8 @@ def ue_process(ue_json_data):
         # 检查完成文件是否存在
         if os.path.isfile(file_path):
             server_logger.info("[UE] Found finish tag")
+            end_time = round(time.time() - start_time, 2)
+            server_logger.info(f"[UE] Finish UE process in {end_time} seconds.")
             break
 
     return images_folder

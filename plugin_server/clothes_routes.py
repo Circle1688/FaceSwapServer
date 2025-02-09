@@ -10,6 +10,7 @@ from plugin_server.schemas import *
 
 from openpyxl import load_workbook
 from io import BytesIO
+from sqlalchemy import or_
 
 router = APIRouter()
 
@@ -52,7 +53,7 @@ async def upload_clothes(file: UploadFile = File(...), db: Session = Depends(get
 
 @router.post('/get_clothes')
 async def get_clothes(request: ClothesRequest, db: Session = Depends(get_db)):
-	db_clothes = db.query(Clothes).filter((Clothes.url == request.url) | (Clothes.name == request.name)).first()
+	db_clothes = db.query(Clothes).filter(or_(Clothes.url == request.url, (Clothes.brand == request.brand) & (Clothes.name == request.name))).first()
 	if not db_clothes:
 		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No data found")
 

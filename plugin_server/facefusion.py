@@ -9,6 +9,8 @@ from plugin_server.utils import *
 
 
 def facefusion_image_interval(source_image_path, target_image_path, image_output_path):
+	start_time = time.time()
+	server_logger.info("[FaceFusionImage] Start facefusion image process...")
 	try:
 		# 请求facefusion
 		request_data = {
@@ -16,8 +18,7 @@ def facefusion_image_interval(source_image_path, target_image_path, image_output
 			"target_path": os.path.abspath(target_image_path),
 			"output_path": os.path.abspath(image_output_path)
 		}
-		response = requests.post(FACEFUSION_URL, json=request_data)
-		rsp_json = response.json()
+		requests.post(FACEFUSION_URL, json=request_data)
 
 		# 压缩
 		img = Image.open(image_output_path)
@@ -30,6 +31,9 @@ def facefusion_image_interval(source_image_path, target_image_path, image_output
 
 		# 移除png原图
 		os.remove(image_output_path)
+
+		end_time = round(time.time() - start_time, 2)
+		server_logger.info(f"[FaceFusionImage] Finish facefusion image process in {end_time} seconds.")
 
 		return True, jpg_path
 	except Exception as e:
@@ -61,10 +65,13 @@ def facefusion_image(source_image_path, images_folder, output_path, image_option
 			compress_image(image_output_path, quality, thumbnail_width)
 		else:
 			return False
+
 	return True
 
 
 def facefusion_video(source_image_path, video_path, output_path):
+	start_time = time.time()
+	server_logger.info("[FaceFusionVideo] Start facefusion video process...")
 	try:
 		video_output_path = output_path + ".mp4"
 		# 请求facefusion
@@ -73,9 +80,10 @@ def facefusion_video(source_image_path, video_path, output_path):
 			"target_path": os.path.abspath(video_path),
 			"output_path": os.path.abspath(video_output_path)
 		}
-		response = requests.post(FACEFUSION_URL, json=request_data)
-		rsp_json = response.json()
+		requests.post(FACEFUSION_URL, json=request_data)
 
+		end_time = round(time.time() - start_time, 2)
+		server_logger.info(f"[FaceFusionVideo] Finish facefusion video process in {end_time} seconds.")
 		return True
 
 	except Exception as e:
@@ -94,11 +102,12 @@ def face_swap_internal(task_id, args):
 
 	start_time = time.time()
 
+	server_logger.info("UE...")
 	# UE生成图像
 	images_folder = ue_process(ue_json_data)
 
 	if not is_video:
-		server_logger.info("FaceFusion...")
+		server_logger.info("FaceFusion image...")
 		# facefusion图像
 		result = facefusion_image(source_image_path, images_folder, output_path, ue_json_data['image_options'])
 	else:
@@ -116,7 +125,6 @@ def face_swap_internal(task_id, args):
 		# 首次换脸成功
 		if first_result:
 			server_logger.info("PixVerse...")
-
 			# 处理视频
 			video_path = os.path.join(temp_dir, 'temp.mp4')
 			if pixverse_process(image_output_path, video_path, ue_json_data['video_options']):
