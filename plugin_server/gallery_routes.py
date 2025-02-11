@@ -24,7 +24,7 @@ def get_avatar_filepath(user_id, thumbnail=False):
         os.makedirs(store_dir)
 
     if thumbnail:
-        filename = f"{user_id}_thumbnail.jpg"
+        filename = f"{user_id}_avatar_thumbnail.jpg"
     else:
         filename = f"{user_id}_avatar.png"
     filepath = os.path.join(store_dir, filename)
