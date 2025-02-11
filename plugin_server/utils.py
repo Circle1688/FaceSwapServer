@@ -14,6 +14,10 @@ def find_png_files(directory):
 
 def compress_image(source_path, quality, thumbnail_width):
     with Image.open(source_path) as img:
+        # 如果图片是RGBA模式，转换为RGB模式
+        if img.mode == 'RGBA':
+            img = img.convert('RGB')
+
         # 计算缩略图的高度，保持图片的原始宽高比
         width, height = img.size
         thumbnail_height = int((thumbnail_width / width) * height)
