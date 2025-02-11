@@ -10,7 +10,7 @@ target_process_name = "FittingRoom.exe"
 
 
 def start_ue():
-    proc = subprocess.Popen([target_process_name], shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
+    proc = subprocess.Popen([target_process_name, f"-ResX={UE_RES_X}", f"-ResY={UE_RES_Y}"], shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
     server_logger.info(f"[UE] UE process has been started at {proc.pid}")
     # 等待进程启动完成
     # while True:
