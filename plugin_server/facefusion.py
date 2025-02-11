@@ -18,7 +18,11 @@ def facefusion_image_interval(source_image_path, target_image_path, image_output
 			"target_path": os.path.abspath(target_image_path),
 			"output_path": os.path.abspath(image_output_path)
 		}
-		requests.post(FACEFUSION_URL, json=request_data)
+		resp = requests.post(FACEFUSION_URL, json=request_data)
+
+		if resp.status_code != 200:
+			server_logger.exception(f"[Image generation failed] {resp.status_code}")
+			return False, None
 
 		# 压缩
 		img = Image.open(image_output_path)
@@ -80,7 +84,11 @@ def facefusion_video(source_image_path, video_path, output_path):
 			"target_path": os.path.abspath(video_path),
 			"output_path": os.path.abspath(video_output_path)
 		}
-		requests.post(FACEFUSION_URL, json=request_data)
+		resp = requests.post(FACEFUSION_URL, json=request_data)
+
+		if resp.status_code != 200:
+			server_logger.exception(f"[Video generation failed] {resp.status_code}")
+			return False
 
 		end_time = round(time.time() - start_time, 2)
 		server_logger.info(f"[FaceFusionVideo] Finish facefusion video process in {end_time} seconds.")
