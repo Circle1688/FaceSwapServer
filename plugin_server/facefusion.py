@@ -4,7 +4,7 @@ import requests
 from plugin_server.config import *
 from plugin_server.logger import server_logger
 from plugin_server.pixverse import pixverse_process
-from plugin_server.ue import ue_process
+from plugin_server.ue import ue_process, start_ue
 from plugin_server.utils import *
 
 
@@ -139,5 +139,7 @@ def face_swap_internal(task_id, args):
 
 	end_time = round(time.time() - start_time, 2)
 	server_logger.info(f"[{task_id}] Finish process in {end_time} seconds.")
+
+	start_ue()
 
 	return result

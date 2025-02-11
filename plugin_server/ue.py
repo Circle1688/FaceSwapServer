@@ -6,8 +6,27 @@ from plugin_server.config import *
 from plugin_server.logger import server_logger
 from plugin_server.utils import *
 
+target_process_name = "FittingRoom.exe"
+
+
+def start_ue():
+    proc = subprocess.Popen([target_process_name], shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
+    server_logger.info(f"[UE] UE process has been started at {proc.pid}")
+    # 等待进程启动完成
+    # while True:
+    #     time.sleep(0.5)
+    #     # 使用psutil检查进程的状态
+    #     p = psutil.Process(proc.pid)
+    #     if p.status() in [psutil.STATUS_RUNNING, psutil.STATUS_SLEEPING]:
+    #         server_logger.info("[UE] UE process has been started")
+    #         break
+    #     else:
+    #         server_logger.info("[UE] UE process has not been started yet")
+    time.sleep(1)
+
 
 def ue_process(ue_json_data):
+
     start_time = time.time()
     # 先请求ue
     try:
@@ -18,28 +37,15 @@ def ue_process(ue_json_data):
         # 如果连接不上UE
         server_logger.info("[UE] UE is offline")
 
-        target_process_name = "FittingRoom.exe"
-
         # 先清理所有的残留进程 包括crash的
         kill_process_by_name(target_process_name)
 
         server_logger.info("[UE] Restart UE process...")
         # 启动一个独立进程，执行FittingRoom.exe程序，并指定creationflags参数
-        proc = subprocess.Popen([target_process_name], shell=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
+        start_ue()
 
-        # 等待进程启动完成
-        while True:
-            time.sleep(1)
-            # 使用psutil检查进程的状态
-            p = psutil.Process(proc.pid)
-            if p.status() in [psutil.STATUS_RUNNING, psutil.STATUS_SLEEPING]:
-                server_logger.info("[UE] UE process has been started")
-                break
-            else:
-                server_logger.info("[UE] UE process has not been started yet")
-
-        # 等待ue启动完成
-        time.sleep(2)
+        # # 等待ue启动完成
+        # time.sleep(2)
 
         # 重新连接
         while True:
@@ -71,5 +77,8 @@ def ue_process(ue_json_data):
             end_time = round(time.time() - start_time, 2)
             server_logger.info(f"[UE] Finish UE process in {end_time} seconds.")
             break
+
+    # 关闭ue
+    kill_process_by_name(target_process_name)
 
     return images_folder
