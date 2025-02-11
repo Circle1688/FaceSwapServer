@@ -154,5 +154,5 @@ def pixverse_process(image_path, video_path, args):
 
         return False
     else:
-        time.sleep(30)
+        time.sleep(16)
         return True
