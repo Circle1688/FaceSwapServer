@@ -123,6 +123,22 @@ image/jpeg
 
 
 
+### /get_avatar_thumbnail
+
+**GET**
+
+**Authorization**
+
+
+
+#### Responses
+
+```json
+image/jpeg
+```
+
+
+
 ### /upload_avatar
 
 **POST**

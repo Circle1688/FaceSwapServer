@@ -7,6 +7,7 @@ from fastapi.responses import FileResponse
 
 from plugin_server.config import *
 from plugin_server.auth import get_current_user_id
+from plugin_server.utils import compress_image
 
 router = APIRouter()
 
@@ -16,13 +17,16 @@ def get_avatar_dir(user_id):
     return os.path.join(USER_DATA_DIR, f"{str(user_id)}/avatar/")
 
 
-def get_avatar_filepath(user_id):
+def get_avatar_filepath(user_id, thumbnail=False):
     # 获取头像路径
     store_dir = os.path.join(USER_DATA_DIR, f"{str(user_id)}/avatar/")
     if not os.path.exists(store_dir):
         os.makedirs(store_dir)
 
-    filename = f"{user_id}_avatar.png"
+    if thumbnail:
+        filename = f"{user_id}_thumbnail.jpg"
+    else:
+        filename = f"{user_id}_avatar.png"
     filepath = os.path.join(store_dir, filename)
     return filepath
 
@@ -45,6 +49,8 @@ async def upload_avatar(file: UploadFile = File(...), user_id: int = Depends(get
     async with aiofiles.open(filepath, "wb") as buffer:
         content = await file.read()
         await buffer.write(content)
+        # 生成缩略图
+        compress_image(filepath, 100, 200)
 
     return {"message": "Uploaded avatar successfully"}
 
@@ -56,6 +62,20 @@ async def get_avatar(user_id: int = Depends(get_current_user_id)):
 
     if not os.path.exists(filepath):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User avatar not found")
+
+    async with aiofiles.open(filepath, "rb") as image_file:
+        image_data = await image_file.read()
+
+    return Response(content=image_data, media_type="image/jpeg")
+
+
+@router.get('/get_avatar_thumbnail')
+async def get_avatar_thumbnail(user_id: int = Depends(get_current_user_id)):
+    # 获取文件路径
+    filepath = get_avatar_filepath(user_id, thumbnail=True)
+
+    if not os.path.exists(filepath):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User avatar thumbnail not found")
 
     async with aiofiles.open(filepath, "rb") as image_file:
         image_data = await image_file.read()
