@@ -353,6 +353,7 @@ body_dimensions is a list, you need to add the key-value pairs.
           "size2": "L"
       },
       "video_options":{
+          "pixverse": true,
           "duration": 5,
           "negative_prompt": "",
           "prompt": "",
