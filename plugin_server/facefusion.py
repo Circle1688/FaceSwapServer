@@ -8,6 +8,24 @@ from plugin_server.ue import ue_process
 from plugin_server.utils import *
 
 
+def stop_facefusion_task():
+	try:
+		# 请求facefusion
+		resp = requests.get(FACEFUSION_URL + '_stop')
+
+		if resp.status_code != 200:
+			server_logger.exception(f"[FaceFusion stop failed] {resp.status_code}")
+			return False
+
+		server_logger.exception("[FaceFusion] stop task successfully")
+		return True
+
+	except Exception as e:
+		server_logger.exception(f"[FaceFusion stop exception] {e}")
+
+		return False
+
+
 def facefusion_image_interval(source_image_path, target_image_path, image_output_path):
 	start_time = time.time()
 	server_logger.info("[FaceFusionImage] Start facefusion image process...")
@@ -18,11 +36,16 @@ def facefusion_image_interval(source_image_path, target_image_path, image_output
 			"target_path": os.path.abspath(target_image_path),
 			"output_path": os.path.abspath(image_output_path)
 		}
-		resp = requests.post(FACEFUSION_URL, json=request_data, timeout=15)
+		try:
+			resp = requests.post(FACEFUSION_URL, json=request_data, timeout=15)
 
-		if resp.status_code != 200:
-			server_logger.exception(f"[Image generation failed] {resp.status_code}")
-			return False, None
+			if resp.status_code != 200:
+				server_logger.exception(f"[Image generation failed] {resp.status_code}")
+				return False, None
+
+		except requests.exceptions.Timeout:
+			if not stop_facefusion_task():
+				return False, None
 
 		# 压缩
 		img = Image.open(image_output_path)
@@ -84,11 +107,16 @@ def facefusion_video(source_image_path, video_path, output_path):
 			"target_path": os.path.abspath(video_path),
 			"output_path": os.path.abspath(video_output_path)
 		}
-		resp = requests.post(FACEFUSION_URL, json=request_data, timeout=40)
+		try:
+			resp = requests.post(FACEFUSION_URL, json=request_data, timeout=40)
 
-		if resp.status_code != 200:
-			server_logger.exception(f"[Video generation failed] {resp.status_code}")
-			return False
+			if resp.status_code != 200:
+				server_logger.exception(f"[Video generation failed] {resp.status_code}")
+				return False
+
+		except requests.exceptions.Timeout:
+			if not stop_facefusion_task():
+				return False
 
 		end_time = round(time.time() - start_time, 2)
 		server_logger.info(f"[FaceFusionVideo] Finish facefusion video process in {end_time} seconds.")
