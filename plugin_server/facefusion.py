@@ -76,10 +76,7 @@ def facefusion_image(source_image_path, images_folder, output_path, image_option
 	target_image_paths = find_png_files(images_folder)
 	for i, target_image_path in enumerate(target_image_paths):
 
-		if len(target_image_paths) == 1:
-			image_output_path = output_path + ".png"
-		else:
-			image_output_path = output_path + f"-{i + 1}" + ".png"
+		image_output_path = output_path + f"-{i + 1}" + ".png"
 
 		server_logger.info(f"FaceFusion process image... {i + 1} of {len(target_image_paths)}")
 
