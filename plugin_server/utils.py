@@ -46,3 +46,19 @@ def kill_process_by_name(process_name):
                 print(f"Process {process_name} PID: {proc.pid} has been ended")
         except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
             print(f"Error while ending process: {e}")
+
+
+def add_suffix(file_path, suffix):
+    # 获取文件的目录和文件名
+    directory, filename = os.path.split(file_path)
+
+    # 获取文件名和扩展名
+    name, ext = os.path.splitext(filename)
+
+    # 添加后缀并重新组合文件名
+    new_filename = f"{name}{suffix}{ext}"
+
+    # 返回新的文件路径
+    new_file_path = os.path.join(directory, new_filename)
+
+    return new_file_path

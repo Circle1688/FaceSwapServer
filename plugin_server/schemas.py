@@ -65,6 +65,9 @@ class VideoGenerateRequest(BaseModel):
 	apparel_details: ApparelDetail
 	video_options: VideoOptions
 
+class UpscaleRequest(BaseModel):
+	video_url: str
+
 class ClothesRequest(BaseModel):
 	url: str
 	brand: str

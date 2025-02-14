@@ -369,7 +369,7 @@ body_dimensions is a list, you need to add the key-value pairs.
           "size2": "L"
       },
       "video_options":{
-          "pixverse": true,
+          "video_live": false,
           "duration": 5,
           "negative_prompt": "",
           "prompt": "",
@@ -387,6 +387,36 @@ body_dimensions is a list, you need to add the key-value pairs.
    "task_id": "string"
 }
 ```
+
+
+
+### /upscale
+
+**POST**
+
+**Authorization**
+
+
+
+#### Request body
+
+```json
+{
+   "video_url": "string"
+}
+```
+
+
+
+#### Responses
+
+```json
+{
+   "task_id": "string"
+}
+```
+
+
 
 
 

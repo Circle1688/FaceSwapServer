@@ -124,7 +124,7 @@ async def get_gallery_image(url: str, user_id: int = Depends(get_current_user_id
 
 
 @router.get('/get_gallery_video/{url}')
-async def get_gallery_image(url: str, user_id: int = Depends(get_current_user_id)):
+async def get_gallery_video(url: str, user_id: int = Depends(get_current_user_id)):
     url += ".mp4"
     # 读取文件
     store_dir = get_gallery_dir(user_id)

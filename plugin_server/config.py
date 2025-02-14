@@ -15,4 +15,5 @@ UE_BAT_PATH = config['ue']['bat_path']
 
 FACEFUSION_URL = config['worker']['facefusion_url']
 PIXVERSE_API_KEY = config['worker']['pixverse_apiKey']
+UPSCALE_URL = config['worker']['upscale_url']
 

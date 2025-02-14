@@ -1,3 +1,4 @@
+import os.path
 import time
 import requests
 
@@ -5,6 +6,7 @@ from plugin_server.config import *
 from plugin_server.logger import server_logger
 from plugin_server.pixverse import pixverse_process
 from plugin_server.ue import ue_process
+from plugin_server.upscale import upscale_process
 from plugin_server.utils import *
 
 
@@ -126,24 +128,36 @@ def facefusion_video(source_image_path, video_path, output_path):
 
 
 def face_swap_internal(task_id, args):
-	source_image_path = args["source_image_path"]
-	ue_json_data = args["ue_json_data"]
-	output_path = os.path.join(args['output_path'], f"{task_id}")
-	is_video = args["video"]
-
+	start_time = time.time()
 	server_logger.info(f"[{task_id}] Start process...")
 
-	start_time = time.time()
+	task_type = args['task_type']
+	if task_type == "upscale":
+		input_path = args["input_path"]
+		output_path = os.path.join(os.path.dirname(input_path), task_id + "_upscale.mp4")
+		result = upscale_process(input_path, output_path)
 
-	server_logger.info("UE...")
-	# UE生成图像
-	images_folder = ue_process(ue_json_data)
+	elif task_type == "image":
+		source_image_path = args["source_image_path"]
+		ue_json_data = args["ue_json_data"]
+		output_path = os.path.join(args['output_path'], f"{task_id}")
 
-	if not is_video:
+		server_logger.info("UE...")
+		# UE生成图像
+		images_folder = ue_process(ue_json_data)
+
 		server_logger.info("FaceFusion image...")
 		# facefusion图像
 		result = facefusion_image(source_image_path, images_folder, output_path, ue_json_data['image_options'])
-	else:
+	elif task_type == "video":
+		source_image_path = args["source_image_path"]
+		ue_json_data = args["ue_json_data"]
+		output_path = os.path.join(args['output_path'], f"{task_id}")
+
+		server_logger.info("UE...")
+		# UE生成图像
+		images_folder = ue_process(ue_json_data)
+
 		target_image_path = find_png_files(images_folder)[0]
 
 		# 创建临时文件夹
@@ -154,7 +168,8 @@ def face_swap_internal(task_id, args):
 
 		server_logger.info("Pre swap face...")
 		# 首次换脸
-		first_result, image_output_path = facefusion_image_interval(source_image_path, target_image_path, image_output_path)
+		first_result, image_output_path = facefusion_image_interval(source_image_path, target_image_path,
+																	image_output_path)
 		# 首次换脸成功
 		if first_result:
 			server_logger.info("PixVerse...")
@@ -169,6 +184,9 @@ def face_swap_internal(task_id, args):
 				result = False
 		else:
 			result = False
+	else:
+		server_logger.info(f"[{task_id}] Unsupported task type.")
+		result = False
 
 	end_time = round(time.time() - start_time, 2)
 	server_logger.info(f"[{task_id}] Finish process in {end_time} seconds.")
