@@ -41,6 +41,8 @@ def delete_obj_oss(file_path):
 
 def get_files_oss(folder_prefix):
     files = []
+    for obj in oss2.ObjectIteratorV2(bucket):
+        print(obj.key, obj.last_modified)
     for obj in oss2.ObjectIteratorV2(bucket, prefix=folder_prefix):
         files.append((obj.key, obj.last_modified))
     print(files)
