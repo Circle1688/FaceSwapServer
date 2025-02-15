@@ -43,6 +43,7 @@ def get_files_oss(folder_prefix):
     files = []
     for obj in oss2.ObjectIteratorV2(bucket):
         print(obj.key, obj.last_modified)
+    print(folder_prefix)
     for obj in oss2.ObjectIteratorV2(bucket, prefix=folder_prefix):
         files.append((obj.key, obj.last_modified))
     print(files)
