@@ -4,6 +4,7 @@ import aiofiles
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import UploadFile, File, Response
 from fastapi.responses import FileResponse
+from starlette.responses import StreamingResponse
 
 from plugin_server.config import *
 from plugin_server.auth import get_current_user_id
@@ -133,7 +134,13 @@ async def get_gallery_video(url: str, user_id: int = Depends(get_current_user_id
     if not os.path.exists(filepath):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video not found")
 
-    return FileResponse(filepath, media_type="video/mp4", filename=f"{url}.mp4")
+    # 定义一个生成器函数来逐块读取文件
+    def iterfile():
+        with open(filepath, mode="rb") as file:
+            while chunk := file.read(200 * 1024):  # 每次读取大小
+                yield chunk
+
+    return StreamingResponse(iterfile(), media_type="video/mp4")
 
 
 @router.get('/get_thumbnail/{url}')
