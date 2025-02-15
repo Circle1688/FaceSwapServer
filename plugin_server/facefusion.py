@@ -52,7 +52,6 @@ def facefusion_image_interval(source_image_path, target_image_path, image_output
 			"target_path": os.path.abspath(target_image_path),
 			"output_path": os.path.abspath(image_output_path)
 		}
-		print(os.path.abspath(source_image_path), os.path.abspath(target_image_path), os.path.abspath(image_output_path))
 		try:
 			resp = requests.post(FACEFUSION_URL, json=request_data, timeout=15)
 
