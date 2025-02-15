@@ -83,9 +83,10 @@ def download_file(url):
         file_path = os.path.join(TEMP_DIR, filename)
         with open(file_path, "wb") as file:
             file.write(response.content)
-
+        print("Download successfully")
         return file_path
     else:
+        print("Download failed")
         return None
 
 
