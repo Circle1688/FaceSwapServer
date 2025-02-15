@@ -2,7 +2,7 @@ import os
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from plugin_server.gallery_routes import get_avatar_filepath, get_gallery_dir
+from plugin_server.gallery_routes import get_avatar_filepath
 from plugin_server.schemas import *
 from plugin_server.TaskManager import Task
 from plugin_server.auth import get_current_user_id
