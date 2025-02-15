@@ -137,7 +137,7 @@ async def get_gallery_video(url: str, user_id: int = Depends(get_current_user_id
     # 定义一个生成器函数来逐块读取文件
     def iterfile():
         with open(filepath, mode="rb") as file:
-            while chunk := file.read(200 * 1024):  # 每次读取大小
+            while chunk := file.read(1024 * 1024):  # 每次读取大小
                 yield chunk
 
     return StreamingResponse(iterfile(), media_type="video/mp4")
