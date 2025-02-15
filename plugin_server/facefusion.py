@@ -148,7 +148,7 @@ def face_swap_internal(task_id, args):
 	server_logger.info(f"[{task_id}] Start process...")
 
 	# 清除临时文件夹内容
-	clear_folder(TEMP_DIR)
+	clear_folder(TEMP_OUTPUT_DIR)
 
 	user_id = args['user_id']
 
