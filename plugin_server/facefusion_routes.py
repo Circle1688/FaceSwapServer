@@ -15,23 +15,13 @@ tasks_manager = Task()
 
 @router.post("/generate")
 async def generate(request: GenerateRequest, user_id: int = Depends(get_current_user_id)):
-
 	# 请求数据
 	ue_json_data = request.dict()
 
 	# 获取头像
 	source_image_path = get_avatar_filepath(user_id)
 
-	if not os.path.exists(source_image_path):
-		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User avatar not found")
-
-	# 确保目录存在
-	store_dir = get_gallery_dir(user_id)
-
-	if not os.path.exists(store_dir):
-		os.makedirs(store_dir)
-
-	args = {"source_image_path": source_image_path, "ue_json_data": ue_json_data, "output_path": store_dir, "task_type": "image"}
+	args = {"avatar_url": source_image_path, "user_id": user_id, "ue_json_data": ue_json_data, "task_type": "image"}
 
 	task_id = await tasks_manager.handle_request(args)
 	return {"task_id": task_id}
@@ -44,16 +34,7 @@ async def generate_video(request: VideoGenerateRequest, user_id: int = Depends(g
 
 	source_image_path = get_avatar_filepath(user_id)
 
-	if not os.path.exists(source_image_path):
-		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User avatar not found")
-
-	# 确保目录存在
-	store_dir = get_gallery_dir(user_id)
-
-	if not os.path.exists(store_dir):
-		os.makedirs(store_dir)
-
-	args = {"source_image_path": source_image_path, "ue_json_data": ue_json_data, "output_path": store_dir, "task_type": "video"}
+	args = {"avatar_url": source_image_path, "user_id": user_id, "ue_json_data": ue_json_data, "task_type": "video"}
 
 	task_id = await tasks_manager.handle_request(args)
 	return {"task_id": task_id}
@@ -62,16 +43,9 @@ async def generate_video(request: VideoGenerateRequest, user_id: int = Depends(g
 @router.post("/upscale")
 async def upscale(request: UpscaleRequest, user_id: int = Depends(get_current_user_id)):
 	# 请求数据
-	video_url = request.video_url + ".mp4"
+	video_url = request.video_url
 
-	# 读取文件
-	store_dir = get_gallery_dir(user_id)
-	filepath = os.path.join(store_dir, video_url)
-
-	if not os.path.exists(filepath):
-		raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Video file not found")
-
-	args = {"input_path": filepath, "task_type": "upscale"}
+	args = {"video_url": video_url, "user_id": user_id, "task_type": "upscale"}
 
 	task_id = await tasks_manager.handle_request(args)
 	return {"task_id": task_id}

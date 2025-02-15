@@ -1,13 +1,27 @@
 import os.path
 import time
-import requests
-
-from plugin_server.config import *
+from plugin_server.gallery_routes import suggest_file_name
 from plugin_server.logger import server_logger
+from plugin_server.oss import upload_file_oss
 from plugin_server.pixverse import pixverse_process
 from plugin_server.ue import ue_process
 from plugin_server.upscale import upscale_process
 from plugin_server.utils import *
+
+# 创建临时文件夹
+if not os.path.exists(TEMP_DIR):
+	os.mkdir(TEMP_DIR)
+
+TEMP_OUTPUT_DIR = os.path.join(TEMP_DIR, 'output')
+if not os.path.exists(TEMP_OUTPUT_DIR):
+	os.mkdir(TEMP_OUTPUT_DIR)
+
+
+def upload_files_oss(folder, user_id):
+	for file in get_files(folder):
+		if not upload_file_oss(file['filepath'], suggest_file_name(user_id, file['filename'])):
+			return False
+	return True
 
 
 def stop_facefusion_task():
@@ -119,74 +133,99 @@ def facefusion_video(source_image_path, video_path, output_path):
 
 		end_time = round(time.time() - start_time, 2)
 		server_logger.info(f"[FaceFusionVideo] Finish facefusion video process in {end_time} seconds.")
-		return True
+		return video_output_path
 
 	except Exception as e:
 		server_logger.exception(f"[Video generation exception] {e}")
 
-		return False
+		return None
 
 
 def face_swap_internal(task_id, args):
+	result = False
 	start_time = time.time()
 	server_logger.info(f"[{task_id}] Start process...")
 
+	# 清除临时文件夹内容
+	clear_folder(TEMP_DIR)
+
+	user_id = args['user_id']
+
 	task_type = args['task_type']
 	if task_type == "upscale":
-		input_path = args["input_path"]
-		output_path = os.path.join(os.path.dirname(input_path), task_id + "_upscale.mp4")
-		result = upscale_process(input_path, output_path)
+		# 下载视频
+		input_path = download_file(args["video_url"])
+
+		if input_path:
+			file_name = f'{task_id}_upscale.mp4'
+			# 输出文件路径
+			output_file_path = os.path.join(TEMP_OUTPUT_DIR, file_name)
+			if upscale_process(input_path, output_file_path):
+				# 生成视频缩略图
+				extract_video_cover(output_file_path)
+				# 上传到oss
+				result = upload_files_oss(TEMP_OUTPUT_DIR, user_id)
 
 	elif task_type == "image":
-		source_image_path = args["source_image_path"]
-		ue_json_data = args["ue_json_data"]
-		output_path = os.path.join(args['output_path'], f"{task_id}")
+		# 下载头像
+		source_image_path = download_file(args["avatar_url"])
 
-		server_logger.info("UE...")
-		# UE生成图像
-		images_folder = ue_process(ue_json_data)
+		if source_image_path:
+			ue_json_data = args["ue_json_data"]
 
-		server_logger.info("FaceFusion image...")
-		# facefusion图像
-		result = facefusion_image(source_image_path, images_folder, output_path, ue_json_data['image_options'])
+			# 输出目录
+			output_path = os.path.join(TEMP_OUTPUT_DIR, f"{task_id}")
+
+			server_logger.info("UE...")
+			# UE生成图像
+			images_folder = ue_process(ue_json_data)
+
+			server_logger.info("FaceFusion image...")
+
+			# facefusion图像
+			if facefusion_image(source_image_path, images_folder, output_path, ue_json_data['image_options']):
+				# 上传到oss
+				result = upload_files_oss(TEMP_OUTPUT_DIR, user_id)
+
 	elif task_type == "video":
-		source_image_path = args["source_image_path"]
-		ue_json_data = args["ue_json_data"]
-		output_path = os.path.join(args['output_path'], f"{task_id}")
+		# 下载头像
+		source_image_path = download_file(args["avatar_url"])
 
-		server_logger.info("UE...")
-		# UE生成图像
-		images_folder = ue_process(ue_json_data)
+		if source_image_path:
+			ue_json_data = args["ue_json_data"]
+			output_path = os.path.join(TEMP_DIR, f"{task_id}")
 
-		target_image_path = find_png_files(images_folder)[0]
+			server_logger.info("UE...")
+			# UE生成图像
+			images_folder = ue_process(ue_json_data)
+			# 获取生成的图像
+			target_image_path = find_png_files(images_folder)[0]
+			# 临时图像文件
+			image_output_path = os.path.join(TEMP_DIR, 'temp.png')
 
-		# 创建临时文件夹
-		temp_dir = './.temp'
-		if not os.path.exists(temp_dir):
-			os.mkdir(temp_dir)
-		image_output_path = os.path.join(temp_dir, 'temp.png')
+			server_logger.info("Pre swap face...")
+			# 首次换脸
+			first_result, image_output_path = facefusion_image_interval(source_image_path, target_image_path, image_output_path)
+			# 首次换脸成功
+			if first_result:
+				server_logger.info("PixVerse...")
+				# 处理视频
+				file_name = f'{task_id}.mp4'
+				# 临时视频文件
+				video_path = os.path.join(TEMP_DIR, file_name)
+				if pixverse_process(image_output_path, video_path, ue_json_data['video_options']):
+					server_logger.info("Process video...")
 
-		server_logger.info("Pre swap face...")
-		# 首次换脸
-		first_result, image_output_path = facefusion_image_interval(source_image_path, target_image_path,
-																	image_output_path)
-		# 首次换脸成功
-		if first_result:
-			server_logger.info("PixVerse...")
-			# 处理视频
-			video_path = os.path.join(temp_dir, 'temp.mp4')
-			if pixverse_process(image_output_path, video_path, ue_json_data['video_options']):
-				server_logger.info("Process video...")
+					# 视频换脸
+					video_output_path = facefusion_video(source_image_path, video_path, output_path)
+					if video_output_path:
+						# 生成视频缩略图
+						extract_video_cover(video_output_path)
+						# 上传到oss
+						result = upload_files_oss(TEMP_OUTPUT_DIR, user_id)
 
-				# 视频换脸
-				result = facefusion_video(source_image_path, video_path, output_path)
-			else:
-				result = False
-		else:
-			result = False
 	else:
 		server_logger.info(f"[{task_id}] Unsupported task type.")
-		result = False
 
 	end_time = round(time.time() - start_time, 2)
 	server_logger.info(f"[{task_id}] Finish process in {end_time} seconds.")
