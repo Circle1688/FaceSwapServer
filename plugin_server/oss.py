@@ -41,6 +41,7 @@ def batch_delete_obj_oss(files):
 
 def delete_obj_prefix_oss(prefix):
     for obj in oss2.ObjectIteratorV2(bucket, prefix=prefix):
+        print(obj.key)
         del_result = bucket.delete_object(obj.key)
         if del_result.status != 200:
             server_logger.info(f"[OSS] {obj.key} delete failed.")
@@ -79,8 +80,3 @@ def get_etag(object_key):
     object_info = bucket.get_object_meta(object_key)
     oss_etag = object_info.etag.strip('"')  # 去除 ETag 的引号
     return oss_etag.lower()
-
-
-def get_last_modified(object_key):
-    object_info = bucket.get_object_meta(object_key)
-    return object_info.last_modified
