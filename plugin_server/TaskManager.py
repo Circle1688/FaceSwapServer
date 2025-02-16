@@ -1,5 +1,6 @@
 import asyncio
 import time
+import uuid
 
 from plugin_server.facefusion import face_swap_internal
 
@@ -39,9 +40,7 @@ class Task:
             self.queue_task.pop(0)
 
     async def handle_request(self, *args):
-        # task_id = str(uuid.uuid4())
-        # 用时间戳可以排序
-        task_id = str(int(time.time() * 1000))
+        task_id = str(uuid.uuid4())
 
         # In queue
         self.tasks[task_id] = 0
