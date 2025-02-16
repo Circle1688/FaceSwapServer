@@ -18,10 +18,7 @@ async def generate(request: GenerateRequest, user_id: int = Depends(get_current_
 	# 请求数据
 	ue_json_data = request.dict()
 
-	# 获取头像
-	source_image_path = get_avatar_filepath(user_id)
-
-	args = {"avatar_url": source_image_path, "user_id": user_id, "ue_json_data": ue_json_data, "task_type": "image"}
+	args = {"user_id": user_id, "ue_json_data": ue_json_data, "task_type": "image"}
 
 	task_id = await tasks_manager.handle_request(args)
 	return {"task_id": task_id}
@@ -32,9 +29,7 @@ async def generate_video(request: VideoGenerateRequest, user_id: int = Depends(g
 	# 请求数据
 	ue_json_data = request.dict()
 
-	source_image_path = get_avatar_filepath(user_id)
-
-	args = {"avatar_url": source_image_path, "user_id": user_id, "ue_json_data": ue_json_data, "task_type": "video"}
+	args = {"user_id": user_id, "ue_json_data": ue_json_data, "task_type": "video"}
 
 	task_id = await tasks_manager.handle_request(args)
 	return {"task_id": task_id}
