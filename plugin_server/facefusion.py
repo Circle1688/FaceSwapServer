@@ -209,10 +209,9 @@ def face_swap_internal(task_id, args):
 			# 首次换脸成功
 			if first_result:
 				server_logger.info("PixVerse...")
-				# 处理视频
-				file_name = f'{task_id}.mp4'
+
 				# 临时视频文件
-				video_path = os.path.join(TEMP_OUTPUT_DIR, file_name)
+				video_path = os.path.join(TEMP_DIR, 'temp.mp4')
 				if pixverse_process(image_output_path, video_path, ue_json_data['video_options']):
 					server_logger.info("Process video...")
 
