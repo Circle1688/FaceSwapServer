@@ -113,7 +113,7 @@ def download_avatar(user_id):
     if not os.path.exists(temp_avatar_dir):
         os.mkdir(temp_avatar_dir)
 
-    local_avatar_file_path = os.path.join(temp_avatar_dir, "avatar.png")
+    local_avatar_file_path = os.path.join(temp_avatar_dir, os.path.basename(avatar_path))
     if os.path.exists(local_avatar_file_path):
         # 获取本地文件的 MD5
         local_md5 = calculate_file_md5(local_avatar_file_path)
