@@ -47,8 +47,12 @@ async def upload_avatar(file: UploadFile = File(...), user_id: int = Depends(get
 
 @router.get('/get_avatar')
 async def get_avatar(user_id: int = Depends(get_current_user_id)):
+    avatar_path = f'{user_id}/avatar/avatar.png'
+    loop = asyncio.get_event_loop()
+    last_modified = await loop.run_in_executor(None, get_last_modified, avatar_path)
     return {"avatar_url": get_avatar_filepath(user_id),
-            "avatar_thumbnail_url": get_full_url_oss(suggest_avatar_name(user_id, thumbnail=True))}
+            "avatar_thumbnail_url": get_full_url_oss(suggest_avatar_name(user_id, thumbnail=True)),
+            "last_modified": last_modified}
 
 
 @router.get('/get_gallery')

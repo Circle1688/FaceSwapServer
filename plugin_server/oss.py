@@ -62,3 +62,8 @@ def get_etag(object_key):
     object_info = bucket.get_object_meta(object_key)
     oss_etag = object_info.etag.strip('"')  # 去除 ETag 的引号
     return oss_etag.lower()
+
+
+def get_last_modified(object_key):
+    object_info = bucket.get_object_meta(object_key)
+    return object_info.last_modified
