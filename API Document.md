@@ -118,23 +118,10 @@ Please save the token for authorization access.
 #### Responses
 
 ```json
-image/jpeg
-```
-
-
-
-### /get_avatar_thumbnail
-
-**GET**
-
-**Authorization**
-
-
-
-#### Responses
-
-```json
-image/jpeg
+{
+    "avatar_url": "https://media.kungcorp.io/33/avatar/avatar.png",
+    "avatar_thumbnail_url": "https://media.kungcorp.io/33/avatar/avatar_thumbnail.jpg"
+}
 ```
 
 
@@ -159,7 +146,8 @@ Image file
 
 ```json
 {
-   "message": "string"
+    "avatar_url": "https://media.kungcorp.io/33/avatar/avatar.png",
+    "avatar_thumbnail_url": "https://media.kungcorp.io/33/avatar/avatar_thumbnail.jpg"
 }
 ```
 
@@ -484,78 +472,29 @@ position = n
 
 ```json
 {
-   "gallery_urls": [
-       {
-           "type":"image",
-           "url":"1738860389536"
-       },
-       {
-           "type":"video",
-           "url":"1738860592428"
-       }
-   ]
+    "gallery_urls": [
+        {
+            "source_url": "https://media.kungcorp.io/33/gallery/3aa38a43-631e-44f4-ae1a-de16d9843cad_upscale.mp4",
+            "thumbnail_url": "https://media.kungcorp.io/33/gallery/3aa38a43-631e-44f4-ae1a-de16d9843cad_upscale_thumbnail.jpg",
+            "last_modified": 1739678557
+        },
+        {
+            "source_url": "https://media.kungcorp.io/33/gallery/fa398b2c-d6c4-4e81-b58e-8585b37cbebc.mp4",
+            "thumbnail_url": "https://media.kungcorp.io/33/gallery/fa398b2c-d6c4-4e81-b58e-8585b37cbebc_thumbnail.jpg",
+            "last_modified": 1739678440
+        },
+        {
+            "source_url": "https://media.kungcorp.io/33/gallery/fa398b2c-d6c4-4e81-b58e-8585b37cbebc.jpg",
+            "thumbnail_url": "https://media.kungcorp.io/33/gallery/fa398b2c-d6c4-4e81-b58e-8585b37cbebc_thumbnail.jpg",
+            "last_modified": 1739678350
+        }
+    ]
 }
 ```
 
 
 
-### /get_gallery_image/{url}
-
-**GET**
-
-**Authorization**
-
-ex：/get_gallery_image/1736386913456-1
-
-
-
-#### Responses
-
-```json
-jpg file
-```
-
-
-
-### /get_gallery_video/{url}
-
-**GET**
-
-**Authorization**
-
-ex：/get_gallery_video/1738860592428
-
-
-
-#### Responses
-
-```json
-mp4 file
-```
-
-
-
-### /get_thumbnail/{url}
-
-**GET**
-
-**Authorization**
-
-ex：/get_thumbnail/1736386913456-1
-
-
-
-#### Responses
-
-```json
-jpg file
-```
-
-
-
-
-
-### /remove_gallery_image/{url}
+### /remove_gallery_file/{file_name}
 
 **DELETE**
 
