@@ -43,8 +43,8 @@ def get_files_oss(folder_prefix):
     files = []
     for obj in oss2.ObjectIteratorV2(bucket, prefix=folder_prefix):
         files.append((obj.key, obj.last_modified))
-    # 按最后修改时间排序（从早到晚）
-    files_sorted_by_time = sorted(files, key=lambda x: x[1])
+    # 按最后修改时间排序（从晚到早）
+    files_sorted_by_time = sorted(files, key=lambda x: x[1], reverse=True)
 
     file_list = []
     for key, _ in files_sorted_by_time:
