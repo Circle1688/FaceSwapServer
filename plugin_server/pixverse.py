@@ -1,13 +1,11 @@
 import json
 import time
 import uuid
-
 import requests
-
 from plugin_server.config import PIXVERSE_API_KEY
 from plugin_server.logger import server_logger
 
-PIXVERSE_POLLING_INTERVAL = 3
+PIXVERSE_POLLING_INTERVAL = 1
 
 def pixverse_upload_image(image_path):
     try:

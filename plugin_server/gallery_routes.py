@@ -1,5 +1,3 @@
-import time
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import UploadFile, File
 from plugin_server.auth import get_current_user_id
@@ -7,55 +5,6 @@ import asyncio
 from plugin_server.utils import *
 
 router = APIRouter()
-
-
-def suggest_avatar_name(user_id, thumbnail=False):
-    if thumbnail:
-        return f'{user_id}/avatar/avatar_thumbnail.jpg'
-    return f'{user_id}/avatar/avatar.png'
-
-
-def get_avatar_filepath(user_id):
-    return get_full_url_oss(suggest_avatar_name(user_id))
-
-
-def suggest_file_name(user_id, file_name):
-    return f'{user_id}/gallery/{file_name}'
-
-
-def upload_avatar_task(user_id, file_obj):
-    prefix = f'{user_id}/avatar/avatar'
-    # 清空目录
-    if not delete_obj_prefix_oss(prefix):
-        return None
-
-    avatar_path = f'{prefix}_{time.time()}.png'
-    thumbnail_avatar_path = f'{prefix}_{time.time()}_thumbnail.jpg'
-
-    # 生成缩略图
-    thumbnail_obj = compress_image_bytes(file_obj, 100, 200)
-
-    if upload_obj_oss(file_obj, avatar_path) and upload_obj_oss(thumbnail_obj, thumbnail_avatar_path):
-        return {"avatar_url": get_full_url_oss(avatar_path),
-                "avatar_thumbnail_url": get_full_url_oss(thumbnail_avatar_path)}
-    else:
-        return None
-
-
-def get_avatar_task(user_id):
-    prefix = f'{user_id}/avatar/avatar'
-    avatar_path = None
-    thumbnail_avatar_path = None
-    for file in get_file_key_oss(prefix):
-        if '_thumbnail.jpg' in file:
-            thumbnail_avatar_path = file
-        else:
-            avatar_path = file
-    if avatar_path and thumbnail_avatar_path:
-        return {"avatar_path": avatar_path,
-                "thumbnail_avatar_path": thumbnail_avatar_path}
-    else:
-        return None
 
 
 @router.post('/upload_avatar')
