@@ -48,9 +48,11 @@ async def get_gallery(user_id: int = Depends(get_current_user_id)):
     files = get_files_oss(f'{user_id}/gallery/')
 
     gallery_urls = []
-    for file in files:
+    for file, last_modified in files:
         if not file.endswith("_thumbnail.jpg"):
-            gallery_urls.append({"source_url": file, "thumbnail_url": file.rsplit('.', 1)[0] + "_thumbnail.jpg"})
+            gallery_urls.append({"source_url": file,
+                                 "thumbnail_url": file.rsplit('.', 1)[0] + "_thumbnail.jpg", 
+                                 "last_modified": last_modified})
 
     return {"gallery_urls": gallery_urls}
 
