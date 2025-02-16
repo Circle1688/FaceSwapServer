@@ -29,16 +29,6 @@ def upload_obj_oss(file_obj, upload_path):
         return False
 
 
-def delete_obj_oss(file_path):
-    result = bucket.delete_object(file_path)
-    if result.status == 200:
-        server_logger.info("[OSS] Delete successfully.")
-        return True
-    else:
-        server_logger.info("[OSS] Delete failed.")
-        return False
-
-
 def batch_delete_obj_oss(files):
     result = bucket.batch_delete_objects(files)
     if result.status == 200:
