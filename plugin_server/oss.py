@@ -46,6 +46,10 @@ def get_files_oss(folder_prefix):
     # 按最后修改时间排序（从晚到早）
     files_sorted_by_time = sorted(files, key=lambda x: x[1], reverse=True)
 
+    file_list = []
+    for key, last_modified in files_sorted_by_time:
+        file_list.append((get_full_url_oss(key), last_modified))
+
     return files_sorted_by_time
 
 
