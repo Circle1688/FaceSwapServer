@@ -71,8 +71,12 @@ async def get_gallery(user_id: int = Depends(get_current_user_id)):
 
 @router.delete('/remove_gallery_file/{file_name}')
 async def remove_gallery_file(file_name: str, user_id: int = Depends(get_current_user_id)):
-    # 删除服务器上的文件
-    if delete_obj_oss(f'{user_id}/gallery/{file_name}'):
+    source_file = f'{user_id}/gallery/{file_name}'
+    thumbnail_filename = f"{os.path.basename(source_file)}_thumbnail.jpg"
+
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(None, batch_delete_obj_oss, [source_file, thumbnail_filename])
+    if result:
         return {"message": f"{file_name} removed successfully"}
     else:
         return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
