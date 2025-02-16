@@ -167,8 +167,11 @@ def extract_video_cover(video_path):
     # 生成封面图的文件名
     output_image_path = os.path.join(dir_path, f"{name}_thumbnail.jpg")
 
+    # 获取视频的最后一帧时间
+    last_frame_time = clip.duration - 0.1  # 稍微提前一点，避免超出范围
+
     # 保存为图片
-    clip.save_frame(output_image_path, t=0)
+    clip.save_frame(output_image_path, t=last_frame_time)
 
     # 关闭视频文件
     clip.close()
