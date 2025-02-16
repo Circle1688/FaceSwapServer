@@ -168,7 +168,7 @@ def face_swap_internal(task_id, args):
 
 	elif task_type == "image":
 		# 下载头像
-		source_image_path = download_file(args["avatar_url"])
+		source_image_path = download_avatar(user_id)
 
 		if source_image_path:
 			ue_json_data = args["ue_json_data"]
@@ -189,7 +189,7 @@ def face_swap_internal(task_id, args):
 
 	elif task_type == "video":
 		# 下载头像
-		source_image_path = download_file(args["avatar_url"])
+		source_image_path = download_avatar(user_id)
 
 		if source_image_path:
 			ue_json_data = args["ue_json_data"]

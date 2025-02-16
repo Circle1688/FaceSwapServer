@@ -99,7 +99,8 @@ def calculate_file_md5(file_path):
     return hash_md5.hexdigest()
 
 
-def download_avatar(avatar_url, user_id):
+def download_avatar(user_id):
+    avatar_path = f'{user_id}/avatar/avatar.png'
     temp_avatar_dir = os.path.join(TEMP_DIR, user_id)
     if not os.path.exists(temp_avatar_dir):
         os.mkdir(temp_avatar_dir)
@@ -108,15 +109,17 @@ def download_avatar(avatar_url, user_id):
     if os.path.exists(local_avatar_file_path):
         # 获取本地文件的 MD5
         local_md5 = calculate_file_md5(local_avatar_file_path)
-        oss_etag = get_etag(f'{user_id}/avatar/avatar.png')
+        oss_etag = get_etag(avatar_path)
 
         if local_md5 == oss_etag:
-            print(f"文件 {object_key} 与本地文件相同，无需下载。")
-            return False
+            print("File is the same as the local file and does not need to be downloaded.")
+            return local_avatar_file_path
         else:
-            print(f"文件 {object_key} 与本地文件不同，开始下载...")
-        else:
-        print(f"本地文件 {local_file_path} 不存在，开始下载...")
+            print("File is different from local file, start downloading...")
+            return download_file(get_full_url_oss(avatar_path))
+    else:
+        print("The local file does not exist, start downloading...")
+        return download_file(get_full_url_oss(avatar_path))
 
 
 def clear_folder(directory):
