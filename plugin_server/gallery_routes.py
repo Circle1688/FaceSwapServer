@@ -50,7 +50,7 @@ async def get_gallery(user_id: int = Depends(get_current_user_id)):
     gallery_urls = []
     for file in files:
         if not file.endswith("_thumbnail.jpg"):
-            gallery_urls.append({"source_url": file, "thumbnail_url": file.split('.')[0] + "_thumbnail.jpg"})
+            gallery_urls.append({"source_url": file, "thumbnail_url": file.rsplit('.', 1)[0] + "_thumbnail.jpg"})
 
     return {"gallery_urls": gallery_urls}
 
