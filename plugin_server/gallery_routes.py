@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import UploadFile, File
 from plugin_server.auth import get_current_user_id
-from plugin_server.oss import *
+import asyncio
 from plugin_server.utils import *
 
 router = APIRouter()
@@ -21,11 +21,8 @@ def suggest_file_name(user_id, file_name):
     return f'{user_id}/gallery/{file_name}'
 
 
-@router.post('/upload_avatar')
-async def upload_avatar(file: UploadFile = File(...), user_id: int = Depends(get_current_user_id)):
-    file_obj = await file.read()
+def upload_avatar_task(user_id, file_obj):
     avatar_path = suggest_avatar_name(user_id)
-
     # 生成缩略图
     thumbnail_obj = compress_image_bytes(file_obj, 100, 200)
     thumbnail_file_path = suggest_avatar_name(user_id, thumbnail=True)
@@ -33,6 +30,17 @@ async def upload_avatar(file: UploadFile = File(...), user_id: int = Depends(get
     if upload_obj_oss(file_obj, avatar_path) and upload_obj_oss(thumbnail_obj, thumbnail_file_path):
         return {"avatar_url": get_full_url_oss(avatar_path),
                 "avatar_thumbnail_url": get_full_url_oss(thumbnail_file_path)}
+    else:
+        return None
+
+
+@router.post('/upload_avatar')
+async def upload_avatar(file: UploadFile = File(...), user_id: int = Depends(get_current_user_id)):
+    file_obj = await file.read()
+    loop = asyncio.get_event_loop()
+    result = await loop.run_in_executor(None, upload_avatar_task, user_id, file_obj)
+    if result:
+        return result
     else:
         return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -51,7 +59,7 @@ async def get_gallery(user_id: int = Depends(get_current_user_id)):
     for file, last_modified in files:
         if not file.endswith("_thumbnail.jpg"):
             gallery_urls.append({"source_url": file,
-                                 "thumbnail_url": file.rsplit('.', 1)[0] + "_thumbnail.jpg", 
+                                 "thumbnail_url": file.rsplit('.', 1)[0] + "_thumbnail.jpg",
                                  "last_modified": last_modified})
 
     return {"gallery_urls": gallery_urls}
