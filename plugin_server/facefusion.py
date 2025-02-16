@@ -193,7 +193,7 @@ def face_swap_internal(task_id, args):
 
 		if source_image_path:
 			ue_json_data = args["ue_json_data"]
-			output_path = os.path.join(TEMP_DIR, f"{task_id}")
+			output_path = os.path.join(TEMP_OUTPUT_DIR, f"{task_id}")
 
 			server_logger.info("UE...")
 			# UE生成图像
