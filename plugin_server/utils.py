@@ -101,7 +101,7 @@ def calculate_file_md5(file_path):
 
 def download_avatar(user_id):
     avatar_path = f'{user_id}/avatar/avatar.png'
-    temp_avatar_dir = os.path.join(TEMP_DIR, user_id)
+    temp_avatar_dir = os.path.join(TEMP_DIR, str(user_id))
     if not os.path.exists(temp_avatar_dir):
         os.mkdir(temp_avatar_dir)
 
