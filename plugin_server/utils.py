@@ -113,8 +113,6 @@ def download_avatar(user_id):
         # 获取本地文件的 MD5
         local_md5 = calculate_file_md5(local_avatar_file_path)
         oss_etag = get_etag(avatar_path)
-        print(local_md5)
-        print(oss_etag)
 
         if local_md5 == oss_etag:
             print("File is the same as the local file and does not need to be downloaded.")
