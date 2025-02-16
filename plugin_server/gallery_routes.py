@@ -1,3 +1,5 @@
+import time
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi import UploadFile, File
 from plugin_server.auth import get_current_user_id
@@ -22,14 +24,36 @@ def suggest_file_name(user_id, file_name):
 
 
 def upload_avatar_task(user_id, file_obj):
-    avatar_path = suggest_avatar_name(user_id)
+    prefix = f'{user_id}/avatar/avatar'
+    # 清空目录
+    if not delete_obj_prefix_oss(prefix):
+        return None
+
+    avatar_path = f'{prefix}_{time.time()}.png'
+    thumbnail_avatar_path = f'{prefix}_{time.time()}_thumbnail.jpg'
+
     # 生成缩略图
     thumbnail_obj = compress_image_bytes(file_obj, 100, 200)
-    thumbnail_file_path = suggest_avatar_name(user_id, thumbnail=True)
 
-    if upload_obj_oss(file_obj, avatar_path) and upload_obj_oss(thumbnail_obj, thumbnail_file_path):
+    if upload_obj_oss(file_obj, avatar_path) and upload_obj_oss(thumbnail_obj, thumbnail_avatar_path):
         return {"avatar_url": get_full_url_oss(avatar_path),
-                "avatar_thumbnail_url": get_full_url_oss(thumbnail_file_path)}
+                "avatar_thumbnail_url": get_full_url_oss(thumbnail_avatar_path)}
+    else:
+        return None
+
+
+def get_avatar_task(user_id):
+    prefix = f'{user_id}/avatar/avatar'
+    avatar_path = None
+    thumbnail_avatar_path = None
+    for file in get_file_key_oss(prefix):
+        if '_thumbnail.jpg' in file:
+            thumbnail_avatar_path = file
+        else:
+            avatar_path = file
+    if avatar_path and thumbnail_avatar_path:
+        return {"avatar_path": avatar_path,
+                "thumbnail_avatar_path": thumbnail_avatar_path}
     else:
         return None
 
@@ -47,12 +71,13 @@ async def upload_avatar(file: UploadFile = File(...), user_id: int = Depends(get
 
 @router.get('/get_avatar')
 async def get_avatar(user_id: int = Depends(get_current_user_id)):
-    avatar_path = f'{user_id}/avatar/avatar.png'
     loop = asyncio.get_event_loop()
-    last_modified = await loop.run_in_executor(None, get_last_modified, avatar_path)
-    return {"avatar_url": get_avatar_filepath(user_id),
-            "avatar_thumbnail_url": get_full_url_oss(suggest_avatar_name(user_id, thumbnail=True)),
-            "last_modified": last_modified}
+    result = await loop.run_in_executor(None, get_avatar_task, user_id)
+    if result:
+        return {"avatar_url": get_full_url_oss(result["avatar_path"]),
+                "avatar_thumbnail_url": get_full_url_oss(result["thumbnail_avatar_path"])}
+    else:
+        return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @router.get('/get_gallery')

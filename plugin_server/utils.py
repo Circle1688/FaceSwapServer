@@ -6,6 +6,8 @@ from PIL import Image
 import os
 from io import BytesIO
 from hashlib import md5
+
+from plugin_server.gallery_routes import get_avatar_task
 from plugin_server.oss import *
 
 
@@ -100,7 +102,11 @@ def calculate_file_md5(file_path):
 
 
 def download_avatar(user_id):
-    avatar_path = f'{user_id}/avatar/avatar.png'
+    avatar_data = get_avatar_task(user_id)
+    if not avatar_data:
+        return None
+    avatar_path = avatar_data['avatar_path']
+
     temp_local_avatar_dir = os.path.join(TEMP_DIR, 'avatar')
     if not os.path.exists(temp_local_avatar_dir):
         os.mkdir(temp_local_avatar_dir)
@@ -119,10 +125,11 @@ def download_avatar(user_id):
             return local_avatar_file_path
         else:
             print("File is different from local file, start downloading...")
-            return download_file(get_full_url_oss(avatar_path), download_dir=temp_avatar_dir)
     else:
         print("The local file does not exist, start downloading...")
-        return download_file(get_full_url_oss(avatar_path), download_dir=temp_avatar_dir)
+
+    clear_folder(temp_avatar_dir)
+    return download_file(get_full_url_oss(avatar_path), download_dir=temp_avatar_dir)
 
 
 def clear_folder(directory):
