@@ -200,8 +200,8 @@ def upload_avatar_task(user_id, file_obj):
     if not delete_obj_prefix_oss(prefix):
         return None
 
-    avatar_path = f'{prefix}_{time.time()}.png'
-    thumbnail_avatar_path = f'{prefix}_{time.time()}_thumbnail.jpg'
+    avatar_path = f'{prefix}_{int(time.time())}.png'
+    thumbnail_avatar_path = f'{prefix}_{int(time.time())}_thumbnail.jpg'
 
     # 生成缩略图
     thumbnail_obj = compress_image_bytes(file_obj, 100, 200)

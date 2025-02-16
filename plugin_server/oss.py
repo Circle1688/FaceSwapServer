@@ -45,7 +45,7 @@ def delete_obj_prefix_oss(prefix):
         if del_result.status != 200:
             server_logger.info(f"[OSS] {obj.key} delete failed.")
             return False
-    server_logger.info(f"[OSS] {prefix} delete successfully.")
+        server_logger.info(f"[OSS] {obj.key} delete successfully.")
     return True
 
 
