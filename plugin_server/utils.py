@@ -74,13 +74,13 @@ def kill_process_by_name(process_name):
             print(f"Error while ending process: {e}")
 
 
-def download_file(url):
+def download_file(url, download_dir=TEMP_DIR):
     filename = os.path.basename(url)
 
     response = requests.get(url)
 
     if response.status_code == 200:
-        file_path = os.path.join(TEMP_DIR, filename)
+        file_path = os.path.join(download_dir, filename)
         with open(file_path, "wb") as file:
             file.write(response.content)
         print("Download successfully")
@@ -101,7 +101,8 @@ def calculate_file_md5(file_path):
 
 def download_avatar(user_id):
     avatar_path = f'{user_id}/avatar/avatar.png'
-    temp_avatar_dir = os.path.join(TEMP_DIR, str(user_id))
+    temp_local_avatar_dir = os.path.join(TEMP_DIR, 'avatar')
+    temp_avatar_dir = os.path.join(temp_local_avatar_dir, str(user_id))
     if not os.path.exists(temp_avatar_dir):
         os.mkdir(temp_avatar_dir)
 
@@ -116,10 +117,10 @@ def download_avatar(user_id):
             return local_avatar_file_path
         else:
             print("File is different from local file, start downloading...")
-            return download_file(get_full_url_oss(avatar_path))
+            return download_file(get_full_url_oss(avatar_path), download_dir=temp_avatar_dir)
     else:
         print("The local file does not exist, start downloading...")
-        return download_file(get_full_url_oss(avatar_path))
+        return download_file(get_full_url_oss(avatar_path), download_dir=temp_avatar_dir)
 
 
 def clear_folder(directory):
