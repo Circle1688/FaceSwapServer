@@ -16,6 +16,10 @@ TEMP_OUTPUT_DIR = os.path.join(TEMP_DIR, 'output')
 if not os.path.exists(TEMP_OUTPUT_DIR):
 	os.mkdir(TEMP_OUTPUT_DIR)
 
+TEMP_DOWNLOAD_DIR = os.path.join(TEMP_DIR, 'download')
+if not os.path.exists(TEMP_DOWNLOAD_DIR):
+	os.mkdir(TEMP_DOWNLOAD_DIR)
+
 
 def upload_files_oss(folder, user_id):
 	for file in get_files(folder):
@@ -148,13 +152,15 @@ def face_swap_internal(task_id, args):
 
 	# 清除临时文件夹内容
 	clear_folder(TEMP_OUTPUT_DIR)
+	# 清除临时文件夹内容
+	clear_folder(TEMP_DOWNLOAD_DIR)
 
 	user_id = args['user_id']
 
 	task_type = args['task_type']
 	if task_type == "upscale":
 		# 下载视频
-		input_path = download_file(args["video_url"])
+		input_path = download_file(args["video_url"], download_dir=TEMP_DOWNLOAD_DIR)
 
 		if input_path:
 			file_name = f'{task_id}_upscale.mp4'
