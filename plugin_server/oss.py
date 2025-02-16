@@ -50,7 +50,7 @@ def get_files_oss(folder_prefix):
     for key, last_modified in files_sorted_by_time:
         file_list.append((get_full_url_oss(key), last_modified))
 
-    return files_sorted_by_time
+    return file_list
 
 
 def get_full_url_oss(filename):
