@@ -182,7 +182,6 @@ def get_avatar_task(user_id):
     avatar_path = None
     thumbnail_avatar_path = None
     for file in get_file_key_oss(prefix):
-        print(file)
         if '_thumbnail.jpg' in file:
             thumbnail_avatar_path = file
         else:
