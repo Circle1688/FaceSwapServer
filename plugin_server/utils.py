@@ -182,6 +182,7 @@ def get_avatar_task(user_id):
     avatar_path = None
     thumbnail_avatar_path = None
     for file in get_file_key_oss(prefix):
+        print(file)
         if '_thumbnail.jpg' in file:
             thumbnail_avatar_path = file
         else:
@@ -200,8 +201,7 @@ def suggest_file_name(user_id, file_name):
 def upload_avatar_task(user_id, file_obj):
     prefix = f'{user_id}/avatar/avatar'
     # 清空目录
-    if not delete_obj_prefix_oss(prefix):
-        return None
+    delete_obj_prefix_oss(prefix)
 
     avatar_path = f'{prefix}_{int(time.time()*1000)}.png'
     thumbnail_avatar_path = f'{prefix}_{int(time.time()*1000)}_thumbnail.jpg'
